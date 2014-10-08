@@ -1,0 +1,28 @@
+.headers ON
+DROP VIEW new_table;
+CREATE VIEW new_table AS
+SELECT * FROM frequency
+UNION
+SELECT 'q' as docid, 'washington' as term, 1 as count
+UNION
+SELECT 'q' as docid, 'taxes' as term, 1 as count
+UNION 
+SELECT 'q' as docid, 'treasury' as term, 1 as count;
+
+DROP VIEW new_table_t;
+CREATE VIEW new_table_t AS
+SELECT term AS term_t, docid AS docid_t,count as count
+FROM new_table;
+
+
+
+SELECT * 
+FROM
+	(SELECT docid as row_name,docid_t as col_name, SUM(count) as SIMILARITY_SCORE
+	FROM 
+		(SELECT docid as docid,docid_t as docid_t,new_table.count*new_table_t.count as count 
+		FROM new_table,new_table_t
+		WHERE new_table.term== new_table_t.term_t)
+	GROUP BY docid,docid_t)
+WHERE row_name='q'
+ORDER BY SIMILARITY_SCORE;
